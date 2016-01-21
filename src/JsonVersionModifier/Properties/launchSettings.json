@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "JsonVersionModifier": {
+      "commandName": "JsonVersionModifier",
+      "commandLineArgs": "C:/Users/ntayl/Documents/GitHub/JsonVersionModifier/src/JsonVersionModifier/ef.json C:/Users/ntayl/Documents/GitHub/JsonVersionModifier/src/JsonVersionModifier/mvc.json"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "JsonVersionModifier Console Application",
+  "authors": [ "ntayl" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Newtonsoft.Json": "7.0.1"
+  },
+
+  "commands": {
+    "JsonVersionModifier": "JsonVersionModifier"
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}
