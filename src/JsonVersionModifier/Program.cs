@@ -12,7 +12,7 @@ namespace JsonVersionModifier
     public class Program
     {
         private static Dictionary<string, bool> _packageLookups = new Dictionary<string, bool>(StringComparer.Ordinal);
-
+        private static string[] remove = new[] {"Microsoft.NETCore.Platforms", "NETStandard.Library"};
         public static void Main(string[] args)
         {
             try
@@ -41,7 +41,7 @@ namespace JsonVersionModifier
                             return;
                         }
 
-                        updateFile |= UpdateDependencies(data);
+                        updateFile |= UpdateDependencies(data, false);
                         updateFile |= UpdateFrameworks(data);
                         updateFile |= AddRuntimes(data);
                     }
@@ -59,7 +59,7 @@ namespace JsonVersionModifier
             }
         }
 
-        private static bool UpdateDependencies(JToken data)
+        private static bool UpdateDependencies(JToken data, bool addCore)
         {
             var dependencies = data["dependencies"] as JObject;
             if (dependencies == null)
@@ -68,15 +68,19 @@ namespace JsonVersionModifier
             }
 
             var updateFile = false;
-            foreach (var dependency in dependencies.Properties().ToArray())
+            if (addCore)
             {
-                if (dependency.Name == "NETStandard.Library")
-                {
-                    dependency.Replace(new JProperty("Microsoft.NETCore.App",
+                updateFile = true;
+                dependencies.AddFirst(new JProperty("Microsoft.NETCore.App",
                         new JObject(
                             new JProperty("version", "1.0.0-*"),
                             new JProperty("type", "platform"))));
-                    updateFile = true;
+            }
+            foreach (var dependency in dependencies.Properties().ToArray())
+            {
+                if (remove.Contains(dependency.Name))
+                {
+                    dependency.Remove();
                 }
             }
 
@@ -91,7 +95,7 @@ namespace JsonVersionModifier
             {
                 if (framework.Name.StartsWith("netstandard"))
                 {
-                    UpdateDependencies(framework.Value);
+                    UpdateDependencies(framework.Value, true);
                     framework.Replace(new JProperty("netcoreapp1.0", framework.Value));
                     updateFile = true;
                 }
