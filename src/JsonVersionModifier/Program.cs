@@ -43,7 +43,10 @@ namespace JsonVersionModifier
 
                         updateFile |= UpdateDependencies(data, false);
                         updateFile |= UpdateFrameworks(data);
-                        updateFile |= AddRuntimes(data);
+                        if (IsRunnable(data))
+                        {
+                      //      updateFile |= AddRuntimes(data);
+                        }
                     }
 
                     if (updateFile)
@@ -64,7 +67,7 @@ namespace JsonVersionModifier
             var dependencies = data["dependencies"] as JObject;
             if (dependencies == null)
             {
-                return false;
+                data["dependencies"] = (dependencies = new JObject());
             }
 
             var updateFile = false;
@@ -93,14 +96,24 @@ namespace JsonVersionModifier
             var updateFile = false;
             foreach (var framework in frameworks.Properties().ToArray())
             {
-                if (framework.Name.StartsWith("netstandard"))
+                if (framework.Name.StartsWith("netstandardapp"))
                 {
-                    UpdateDependencies(framework.Value, true);
+                    UpdateDependencies(framework.Value, addCore: IsRunnable(data));
                     framework.Replace(new JProperty("netcoreapp1.0", framework.Value));
+                    updateFile = true;
+                }
+                else if (framework.Name.StartsWith("dnx4"))
+                {
+                    framework.Replace(new JProperty(framework.Name.Replace("dnx", "net"), framework.Value));
                     updateFile = true;
                 }
             }
             return updateFile;
+        }
+
+        private static bool IsRunnable(JToken data)
+        {
+            return data["testRunner"] != null || data["compilationOptions"]?["emitEntryPoint"]?.Value<bool>() == true;
         }
 
         private static bool AddRuntimes(JToken data)
